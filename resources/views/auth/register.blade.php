@@ -62,6 +62,16 @@
             </div>
 
             <div class="mb-3">
+                <label for="role" class="form-label">Register As</label>
+                <select name="role" class="form-select shadow-sm" required>
+                    <option value="">-- Select Role --</option>
+                    <option value="employee" {{ old('role') == 'employee' ? 'selected' : '' }}>Employee</option>
+                    <option value="employer" {{ old('role') == 'employer' ? 'selected' : '' }}>Employer</option>
+                </select>
+                @error('role') <small class="text-danger">{{ $message }}</small> @enderror
+            </div>
+
+            <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" name="password" class="form-control shadow-sm" placeholder="Enter password" required>
                 @error('password') <small class="text-danger">{{ $message }}</small> @enderror

@@ -9,7 +9,7 @@
 <body class="bg-gray-50 text-gray-900 min-h-screen flex flex-col">
 
   <!-- Header -->
-  <header class="bg-white shadow">
+  <header class="bg-white shadow w-full">
     <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
       <h1 class="text-2xl font-bold text-indigo-600">FindWork</h1>
       <nav class="space-x-6">
@@ -24,10 +24,10 @@
   </header>
 
   <!-- Search Section -->
-  <section class="bg-white py-12">
-    <div class="max-w-4xl mx-auto text-center">
+  <section class="bg-white py-12 w-full">
+    <div class="max-w-5xl mx-auto text-center px-4">
       <h2 class="text-4xl font-bold mb-4">Find your <span class="text-indigo-500">dream job</span></h2>
-      <form method="GET" action="{{ route('jobs.search') }}" class="flex flex-col md:flex-row justify-center gap-4 px-4">
+      <form method="GET" action="{{ route('jobs.search') }}" class="flex flex-col md:flex-row justify-center gap-4">
         <input
           type="text"
           name="keyword"
@@ -41,7 +41,8 @@
           class="w-full md:w-1/3 px-4 py-2 border rounded-md"
           aria-label="Select Location"
         >
-          <option value="" disabled {{ request('location') ? '' : 'selected' }}>Select Location</option>
+          <option value="" {{ request('location') == '' ? 'selected' : '' }}>Any Location</option>
+          <!-- <option value="non location" {{ request('location') == 'non location' ? 'selected' : '' }}>No Location</option> -->
           @foreach(['Phnom Penh', 'Siem Reap', 'Battambang', 'Sihanoukville', 'Kampong Cham', 'Takeo', 'Kampot', 'Kandal', 'Prey Veng', 'Pursat'] as $loc)
             <option value="{{ $loc }}" {{ request('location') == $loc ? 'selected' : '' }}>{{ $loc }}</option>
           @endforeach
@@ -50,43 +51,81 @@
       </form>
     </div>
   </section>
-
-  <!-- Job Listings -->
-  <main class="flex-grow max-w-7xl mx-auto px-4 py-10">
-    <h2 class="text-xl font-semibold mb-6">Job Listings</h2>
-
-    @if ($jobs->count())
-      <div class="space-y-6">
-  @foreach ($jobs as $job)
-    <div class="bg-white p-4 rounded-md shadow flex justify-between items-center">
-      <div>
-        <h3 class="font-semibold text-lg">{{ $job->title }}</h3>
-        <p class="text-gray-600">{{ $job->company }} • {{ $job->location }}</p>
-        <p class="text-sm text-gray-500 mt-1">{{ $job->category }} • {{ $job->employment_type ?? 'N/A' }}</p>
-      </div>
-      <div>
-        <a href="{{ route('jobs.apply.form', $job->id) }}" 
-           class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
-           Apply
-        </a>
-      </div>
-    </div>
-@endforeach
-
+<div class="flex  justify-end m-4">
+  <a href="{{ route('jobs.favorites') }}" 
+     class="inline-block px-4 py-2 bg-pink-400 text-white rounded-md hover:bg-pink-500 transition">
+     My Favorites
+  </a>
 </div>
 
 
-      <!-- Pagination -->
-      <div class="mt-8">
-        {{ $jobs->withQueryString()->links() }}
-      </div>
-    @else
-      <p class="text-center text-gray-500">No jobs found.</p>
-    @endif
+
+
+
+
+
+  <!-- Job Listings -->
+  <main class="flex-grow w-full px-4 py-10 bg-gray-50">
+    <div class="max-w-7xl mx-auto">
+      <h2 class="text-xl font-semibold mb-6">Job Listings</h2>
+
+      @if ($jobs->count())
+        <div class="space-y-6">
+          @foreach ($jobs as $job)
+            <div class="bg-white rounded-lg shadow overflow-hidden flex flex-col md:flex-row items-center md:items-start">
+
+              <!-- Job Image -->
+              <div class="w-full md:w-1/3 h-48 md:h-48 overflow-hidden">
+                <img src="{{ asset('images/office.jpeg') }}" alt="Test Image" class="object-cover w-full h-full" />
+              </div>
+
+              <!-- Job Details -->
+              <div class="flex-1 p-6">
+                <h3 class="text-lg font-semibold">{{ $job->title }}</h3>
+                <p class="text-gray-600">{{ $job->company }} • {{ $job->location }}</p>
+                <p class="text-sm text-gray-500 mt-1">{{ $job->category }} • {{ $job->employment_type ?? 'N/A' }}</p>
+              </div>
+
+              <!-- Favorite Form -->
+              <div class="p-6">
+        <form action="{{ route('jobs.favorite', $job) }}" method="POST" style="display:inline;">
+    @csrf
+    <button type="submit">
+        @if(auth()->user()->favorites->contains($job))
+            ❤️ Unfavorite
+        @else
+            🤍 Favorite
+        @endif
+    </button>
+</form>
+
+</form>
+
+              </div>
+
+              <!-- Apply Button -->
+              <div class="p-6">
+                <a href="{{ route('jobs.apply.form', $job->id) }}"
+                   class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                   Apply
+                </a>
+              </div>
+            </div>
+          @endforeach
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-8">
+          {{ $jobs->withQueryString()->links() }}
+        </div>
+      @else
+        <p class="text-center text-gray-500">No jobs found.</p>
+      @endif
+    </div>
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-900 text-white py-10 mt-auto">
+  <footer class="bg-gray-900 text-white py-10 mt-auto w-full">
     <div class="max-w-7xl mx-auto px-4 text-center text-sm text-gray-400">
       © 2025 JobHuntly. All rights reserved.
     </div>

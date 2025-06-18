@@ -6,6 +6,29 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobApplicationController;
 use App\Models\Job; // if needed somewhere else, keep it
+use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\EmployerJobController;
+use App\Http\Controllers\EmployerDashboardController;
+
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile/edit', [ProfileController::class, 'update'])->name('profile.update');
+});
+Route::middleware(['auth'])->group(function () {
+    Route::get('/employer/dashboard', function () {
+        return view('employer.dashboard'); // This should match the file in resources/views/employer/dashboard.blade.php
+    })->name('employer.dashboard');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/jobs/create', [EmployerJobController::class, 'create'])->name('jobs.create');
+    Route::post('/jobs', [EmployerJobController::class, 'store'])->name('jobs.store');
+});
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +44,29 @@ use App\Models\Job; // if needed somewhere else, keep it
 //     $jobs = Job::paginate(10);
 //     return view('home', compact('jobs'));
 // });
+Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(function () {
+    Route::get('/dashboard', [EmployerDashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
+});
+// Route::get('/dashboard', function () {
+//     return view('dashboard'); // Make sure resources/views/dashboard.blade.php exists
+// })->name('dashboard')->middleware('auth');
+Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(function () {
+    Route::get('/dashboard', [EmployerDashboardController::class, 'index'])->name('dashboard');
+    // Other employer routes here...
+});
+
+
+Route::get('/favorites', [JobController::class, 'favorites'])->name('jobs.favorites');
+
+Route::post('/jobs/{job}/favorite', [JobController::class, 'toggleFavorite'])
+    ->middleware('auth')
+    ->name('jobs.favorite');
+// Route::post('/jobs/{job}/favorite', [JobController::class, 'favorite'])->name('jobs.favorite');
+
     Route::post('/jobs/{job}/apply', [JobApplicationController::class, 'store'])->name('jobs.apply');
 
 // ✅ Keep this — with auth protection
@@ -44,6 +90,10 @@ Route::middleware('auth')->group(function () {
 // Route::get('/test', function () {
 //     return view('home');
 // });
+Route::middleware(['auth'])->group(function () {
+    Route::view('/dashboard', 'dashboard')->name('dashboard');
+});
+
 
 // Homepage or welcome page (guest)
 Route::get('/', function () {

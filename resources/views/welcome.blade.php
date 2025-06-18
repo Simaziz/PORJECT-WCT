@@ -33,15 +33,29 @@
     <section class="px-4 py-10">
         <h2 class="text-2xl font-semibold mb-4">Explore by <span class="text-blue-400">category</span></h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            @foreach ([
-                ['Design', 235], ['Sales', 756], ['Marketing', 210], ['Finance', 390],
-                ['Technology', 458], ['Engineering', 211], ['Backends', 91], ['Human Resource', 154]
-            ] as [$category, $jobs])
-            <div class="bg-gray-800 p-4 rounded shadow hover:shadow-lg">
-                <h3 class="text-lg font-medium">{{ $category }}</h3>
-                <p class="text-sm text-gray-400">{{ $jobs }} jobs available</p>
-            </div>
-            @endforeach
+     @foreach ([
+    ['Design', 235, 'design.jpeg'],
+    ['Sales', 756, 'sales.jpeg'],
+    ['Marketing', 210, 'marketing.jpeg'],
+    ['Finance', 390, 'finance.jpeg'],
+    ['Technology', 458, 'technology.jpeg'],
+    ['Engineering', 211, 'engineering.jpeg'],
+    ['Backends', 91, 'backends.jpeg'],
+    ['Human Resource', 154, 'human-resource.jpeg']
+] as [$category, $jobs, $image])
+<div class="bg-gray-800 p-8 w-[400px] rounded shadow-lg hover:shadow-xl flex items-center space-x-6 transform hover:scale-105 transition duration-300">
+    <img src="{{ asset('images/categories/' . $image) }}" alt="{{ $category }}" class="w-[400px] h-16 object-cover rounded-md">
+    <div>
+        <h3 class="text-2xl font-semibold">{{ $category }}</h3>
+        <p class="text-md text-gray-400">{{ $jobs }} jobs available</p>
+    </div>
+</div>
+@endforeach
+
+
+
+
+
         </div>
     </section>
 

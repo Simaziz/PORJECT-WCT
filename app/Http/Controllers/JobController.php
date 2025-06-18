@@ -6,7 +6,10 @@ use App\Models\Job;
 use App\Models\JobApplication;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use App\Models\User;
+
+
+
 
 class JobController extends Controller
 {
@@ -39,7 +42,10 @@ class JobController extends Controller
         }
 
         if ($request->filled('location')) {
-            $query->where('location', $request->location);
+            $loc = strtolower(trim($request->location));
+            if ($loc !== 'non location' && $loc !== 'any') {
+                $query->where('location', $request->location);
+            }
         }
 
         $jobs = $query->latest()
@@ -76,15 +82,13 @@ class JobController extends Controller
             'resume'          => 'nullable|file|mimes:pdf|max:2048',
         ]);
 
-        // Store resume if uploaded
         if ($request->hasFile('resume')) {
             $validated['resume_path'] = $request->file('resume')->store('resumes', 'public');
         }
 
-        // Save job application
         JobApplication::create([
             'job_id'          => $job->id,
-            'user_id'         => Auth::id(),  // Optional: store logged-in user
+            'user_id'         => Auth::id(),
             'applicant_name'  => $validated['applicant_name'],
             'applicant_email' => $validated['applicant_email'],
             'cover_letter'    => $validated['cover_letter'] ?? null,
@@ -95,4 +99,44 @@ class JobController extends Controller
             ->route('jobs.apply.form', $job)
             ->with('success', 'Your application has been submitted!');
     }
+
+    /**
+     * Toggle job favorite status for the authenticated user.
+     *
+     * @param \App\Models\Job $job
+     * @return \Illuminate\Http\RedirectResponse
+     */
+  public function toggleFavorite(Job $job)
+{
+    /** @var \App\Models\User|null $user */
+    $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('error', 'Please login to favorite jobs.');
+    }
+
+    if ($user->favorites()->where('job_id', $job->id)->exists()) {
+        $user->favorites()->detach($job->id);
+    } else {
+        $user->favorites()->attach($job->id);
+    }
+
+    return back();
+}
+public function favorites()
+{
+    /** @var \App\Models\User $user */
+    $user = Auth::user();
+
+    if (!$user) {
+        return redirect()->route('login')->with('error', 'Please log in to view favorites.');
+    }
+
+    $favorites = $user->favorites()->latest()->paginate(10);
+
+    return view('favorites', compact('favorites'));
+}
+
+
+
 }

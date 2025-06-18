@@ -17,26 +17,29 @@ class RegisterController extends Controller
     }
 
     // Handle registration form submission
-    public function store(Request $request)
-    {
-        // Validate incoming request
-        $request->validate([
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|email|unique:users,email',
-            'password' => 'required|confirmed|min:8',
-        ]);
+   public function store(Request $request)
+{
+    $request->validate([
+        'name' => 'required',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:6|confirmed',
+        'role' => 'required|in:employee,employer',
+    ]);
 
-        // Create user
-        $user = User::create([
-            'name'     => $request->name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+    $user = User::create([
+        'name' => $request->name,
+        'email' => $request->email,
+        'password' => bcrypt($request->password),
+        'role' => $request->role,
+    ]);
 
-        // Log the user in
-        Auth::login($user);
-
-        // Redirect to home with success message
-        return redirect()->route('home')->with('success', 'Registration successful! Welcome.');
+    Auth::login($user);
+    // Redirect based on role
+    if ($user->isEmployer()) {
+return redirect()->route('employer.dashboard');
     }
+
+    return redirect('/home'); // or conditionally redirect based on role
+}
+
 }

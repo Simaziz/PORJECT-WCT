@@ -22,7 +22,11 @@ class LoginController extends Controller
                 return back()->with('error', 'Your account was rejected.');
             }
 
-            // Redirect to /home after login
+            // ✅ Role-based redirect
+            if ($user->role === 'employer') {
+                return redirect()->route('employer.dashboard')->with('message', 'Welcome, Employer!');
+            }
+
             return redirect('/home')->with('message', 'Login successful!');
         }
 
